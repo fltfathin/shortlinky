@@ -1,0 +1,2 @@
+FLASK_APP=shortlinky
+FLASK_ENV=development

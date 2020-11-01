@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+</head>
+<body>
+    <div id="app">
+        <form action="" @submit.prevent="post" method="post">
+            <input type="text" v-model="url" name="url" id="url" placeholder="urlmu">
+            <br>
+            <input type="text" v-model="shortlink" name="shortlink" id="shortlink" placeholder="shortlink (kosongkan untuk random)">
+            <br>
+            <button type="submit">shorten !</button>
+        </form>
+    </div>
+    <script>
+    app = new Vue({
+        el: "#app",
+        data: {
+            url: "",
+            shortlink: ""
+        },
+        methods: {
+            async post(){
+                let payload = {url:this.url, shortlink:this.shortlink}
+                // console.log(payload)
+                const response = await fetch('/api/',{
+                    method:"POST",
+                    credentials: "same-origin",
+                    headers: {
+                        'Content-Type': 'application/json'
+                        },
+                    body: JSON.stringify(payload)})
+            }
+        }
+    })
+    </script>
+</body>
+</html>
