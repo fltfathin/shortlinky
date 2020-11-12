@@ -4,26 +4,51 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="/static/vue.global.js"></script>
+    <link rel="stylesheet" href="/static/bulma.min.css" integrity="sha256-WLKGWSIJYerRN8tbNGtXWVYnUM5wMJTXD8eG4NtGcDM=" crossorigin="anonymous">
 </head>
 <body>
-    <div id="app">
-        <form action="" @submit.prevent="post" method="post">
-            <input type="text" v-model="url" name="url" id="url" placeholder="urlmu">
-            <br>
-            <input type="text" v-model="shortlink" name="shortlink" id="shortlink" placeholder="shortlink (kosongkan untuk random)">
-            <br>
-            <button type="submit">shorten !</button>
-        </form>
+    <div class="section">
+    <div class="columns is-centered">
+        <div class="column is-4">
+            <div id="app">
+                <form class="form" action="" @submit.prevent="post" method="post">
+                    <div class="field">
+                    <div class="control">
+                        <input class="input" type="text" v-model="url" name="url" id="url" placeholder="urlmu">
+                    </div>
+                    </div>
+                    <div class="field">
+                    <div class="control">
+                        <input class="input" type="text" v-model="shortlink" name="shortlink" id="shortlink" placeholder="shortlink (kosongkan untuk random)">
+                    </div>
+                    </div>
+                    <div v-if="notifikasi_show" class="notification">
+                    {%raw%}
+                    <button class="delete" @click="close"></button>
+                    <p>
+                    {{notifikasi}}
+                    <a v-if="disp_shortlink" v-bind:href="disp_shortlink">{{disp_shortlink}}</a>
+                    </p>
+                    </div>
+                    {%endraw%}
+                    <button class="button is-primary is-fullwidth" type="submit">shorten !</button>
+                </form>
+            </div>
+        </div>
     </div>
+    </div>
+    
     <script>
-    app = new Vue({
-        el: "#app",
-        data: {
+    app = Vue.createApp({
+        data(){
+            return {
             url: "",
-            shortlink: ""
-        },
+            shortlink: "",
+            notifikasi: "ini notifikasi",
+            disp_shortlink: "",
+            notifikasi_show: true
+        }},
         methods: {
             async post(){
                 let payload = {url:this.url, shortlink:this.shortlink}
@@ -35,9 +60,23 @@
                         'Content-Type': 'application/json'
                         },
                     body: JSON.stringify(payload)})
+                response.json().then(data=>{
+                    if (data.ok){
+                        this.notifikasi = `sukses!`;
+                        this.disp_shortlink = `http://${window.location.host}${data.shortlink}`
+                    } else {
+                        this.notifikasi = data.error;
+                        this.disp_shortlink = ""
+                    }
+                })
+                
+
+            },
+            close(){
+                this.notifikasi_show = false
             }
         }
-    })
+    }).mount("#app")
     </script>
 </body>
 </html>
