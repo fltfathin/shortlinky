@@ -1,12 +1,17 @@
 import os
 
-from flask import Flask, request, render_template, redirect
+from flask import Flask, request, render_template, redirect, g, url_for, make_response
 import re
 from flask_sqlalchemy import SQLAlchemy
 from secrets import token_urlsafe
+from functools import wraps
+from .decorators import login_required
+from .routes import mod
 
 url_re = re.compile(
-    r"(http[s]?://)?(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+")
+    r"(http[s]?://)?(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+"
+)
+
 
 def create_app(test_config=None):
     # create and configure the app
@@ -35,11 +40,25 @@ def create_app(test_config=None):
 
     db, User, Link = make_db(app)
 
-    @app.route("/")
-    def index():
-        return render_template("index.html")
+    app.register_blueprint(mod)
+
+    @app.route("/login/", methods=["GET", "POST"])
+    def login():
+        if request.method == "POST":
+            username = request.form.get("username")
+            password = request.form.get("password")
+            if username == "fathin" and password == "secret":
+                res = make_response(
+                    redirect(request.args.get("next", url_for("simple_bp.index")))
+                )
+                res.set_cookie("user", username)
+                return res
+            else:
+                return render_template("login.html", error="wrong username/password")
+        return render_template("login.html")
 
     @app.route("/api/", methods=["GET", "POST"])
+    @login_required
     def hello():
         if request.method == "POST":
             try:
@@ -50,8 +69,8 @@ def create_app(test_config=None):
                     shortlink = data.get("shortlink")
                     if shortlink == "" or shortlink is None:
                         shortlink = token_urlsafe(64)[0:8]
-                    thing = Link(link=url, shortlink=shortlink)
-                    db.session.add(thing)
+                    new_link = Link(link=url, shortlink=shortlink)
+                    db.session.add(new_link)
                     db.session.commit()
                     return {"ok": True, "shortlink": f"/{shortlink}"}
                 else:
@@ -64,7 +83,6 @@ def create_app(test_config=None):
     @app.route("/<linkid>")
     def redir(linkid):
         url = Link.query.filter_by(shortlink=linkid).first()
-        print(url)
         if url is None:
             return render_template("404.html", error="link unavailable")
         return redirect(url.link)

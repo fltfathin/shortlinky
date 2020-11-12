@@ -3,11 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Link not Found</title>
+    <title>{% if title%}{{title}}{%else%}Shortlinky{%endif%}</title>
+    <script src="/static/vue.global.js"></script>
+    <link rel="stylesheet" href="/static/bulma.min.css">
 </head>
 <body>
+<div class="section">
+            <div class="columns is-centered">
+                <div class="column is-4">
     {% block body %}
-
     {% endblock %}
+
+                </div>
+            </div>
+        </div>
 </body>
 </html>
