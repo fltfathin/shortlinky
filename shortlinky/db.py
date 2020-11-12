@@ -1,17 +1,29 @@
-from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import Column, Integer, String
+from sqlalchemy.engine import create_engine
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.declarative import declarative_base
 
-def make_db(app):
-    db: SQLAlchemy = SQLAlchemy(app=app)
+engine = create_engine("sqlite:///instance/shortlinky.sqlite3")
 
-    class User(db.Model):
-        id = db.Column(db.Integer, primary_key=True)
-        username = db.Column(db.String(80), unique=True, nullable=False)
-        pass_hash = db.Column(db.String(100), nullable=False)
+Base = declarative_base()
 
-    class Link(db.Model):
-        id = db.Column(db.Integer, primary_key=True)
-        link = db.Column(db.String(200), nullable=False)
-        shortlink = db.Column(db.String(100), nullable=False)
+db = sessionmaker()
+db.configure(bind=engine)
+session = db()
 
-    db.create_all()
-    return db, User, Link
+
+class User(Base):
+    __tablename__ = "users"
+    id = Column(Integer, primary_key=True)
+    username = Column(String(80), unique=True, nullable=False)
+    pass_hash = Column(String(100), nullable=False)
+
+
+class Link(Base):
+    __tablename__ = "links"
+    id = Column(Integer, primary_key=True)
+    link = Column(String(200), nullable=False)
+    shortlink = Column(String(100), nullable=False)
+
+
+Base.metadata.create_all(bind=engine)
