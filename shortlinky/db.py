@@ -18,6 +18,8 @@ class User(Base):
     username = Column(String(80), unique=True, nullable=False)
     pass_hash = Column(String(100), nullable=False)
 
+# TODO: handle hash
+
 
 class Link(Base):
     __tablename__ = "links"
@@ -26,4 +28,5 @@ class Link(Base):
     shortlink = Column(String(100), nullable=False)
 
 
-Base.metadata.create_all(bind=engine)
+def create_db():
+    Base.metadata.create_all(bind=engine)

@@ -64,6 +64,8 @@ def hello():
             return {"ok": False, "error": str(e)}, 500
     return {"ok": "peko"}
 
+# TODO: manage links
+
 
 # a simple page that says hello
 @mod.route("/<linkid>")
